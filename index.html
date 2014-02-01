@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <style>
+    .bar {
+        background-color: #333;
+        border-right: solid 2px #000;
+        border-bottom: solid 1px #555;
+        height: 5px;
+        display: block;
+    }
+    </style>
+</head>
+<body>
+    <audio id="music" controls>
+        <source src="Sign.mp3" type="audio/mpeg"/>
+    </audio>
+    <br>
+    <span>lowpass filter: </span>
+    <input id="filter" value="1" min="0" max="1" step="0.001" type="range">
+    <br>
+    <div id="display">
+    </div>
+    <p>music is from
+    <a href="https://soundcloud.com/dittos/ray-sign-ditto-kim-remix-free">
+    soundcloud/dittos
+    </a>
+    </p>
+    <script>
+    var AudioContext = AudioContext || webkitAudioContext;
+    var audioElement = document.getElementById('music');
+    var audioContext = new AudioContext();
+    var source = audioContext.createMediaElementSource(audioElement);
+    var filter = audioContext.createBiquadFilter();
+    var analyser = audioContext.createAnalyser();
+    filter.type = 'lowpass'; //highpass, bandpass, peaking, notch etc...
+    filter.Q.value = 30; // Q Factor
+    analyser.fftSize = 32;
+    audioElement.addEventListener('canplay', function() {
+        source.connect(filter);
+        filter.connect(analyser);
+        analyser.connect(audioContext.destination);
+        window.requestAnimationFrame(frame);
+    });
+    var filterSlider = document.getElementById('filter');
+    filterSlider.oninput = function () {
+        var min = 40;
+        var max = audioContext.sampleRate / 2;
+        var numberOfOctaves = Math.log(max / min) / Math.LN2;
+        var multiplier = Math.pow(
+            2, numberOfOctaves * (filterSlider.value - 1));
+        filter.frequency.value = max * multiplier;
+    };
+    filterSlider.oninput();
+    var prev = 0;
+    var display = document.getElementById('display');
+    function frame(timestamp) {
+        window.requestAnimationFrame(frame);
+        var delta = timestamp - prev;
+        var fps = 1 / delta * 1000;
+        prev = timestamp;
+        var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(frequencyData);
+        var barArray = [];
+        for (var i = 0; i < analyser.frequencyBinCount; ++i)
+            barArray.push(
+                '<div class="bar" style="width: ' +
+                frequencyData[i] + 'px;">&nbsp;</div>');
+        display.innerHTML = barArray.join('');
+    }
+    </script>
+</body>
+</html>
