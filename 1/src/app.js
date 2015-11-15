@@ -2,35 +2,31 @@ import soundcloudBadge from 'soundcloud-badge-packed';
 import SoundAnalyzer from './sound-analyzer';
 import PIXI from 'pixi';
 import $ from 'jquery';
+import * as stage from './stage';
 import { shape, update as updateShape } from './shape';
 import { shape as eqShape, update as updateEqShape } from './eq-shape';
 
+const $body = $(document.body);
 let audio = new Audio();
-let stage = new PIXI.Container();
-let stageWidth, stageHeight, halfStageWidth, halfStageHeight;
-let renderer = new PIXI.autoDetectRenderer(stageWidth, stageHeight); {
+let renderer = new PIXI.autoDetectRenderer(stage.width, stage.height); {
     let viewStyle = renderer.view.style;
     viewStyle.display = 'block';
     $(document.body).append(renderer.view);
 }
 let analyzer = new SoundAnalyzer(audio);
-{ // layout
-    function layout() {
-        { // stage
-            [stageWidth, stageHeight] = [window.innerWidth, window.innerHeight];
-            [halfStageWidth, halfStageHeight] = [stageWidth / 2, stageHeight / 2];
-            renderer.resize(stageWidth, stageHeight);
-        }
+{ // onresize
+    function onresize() {
+        renderer.resize(stage.width, stage.height);
         { // shape
-            shape.x = halfStageWidth;
-            shape.y = halfStageHeight;
+            shape.x = stage.halfWidth;
+            shape.y = stage.halfHeight;
         }
         { // eq shape
-            eqShape.y = stageHeight;
+            eqShape.y = stage.height;
         }
     }
-    layout();
-    $(window).resize(layout);
+    onresize();
+    $(window).resize(onresize);
 }
 
 async function entry() {
@@ -45,14 +41,17 @@ async function entry() {
             else resolve(src);
         });
     });
-    audio.crossOrigin = 'anonymous';
-    audio.src = audioSrc;
-    await new Promise(resolve => { audio.addEventListener('canplay', () => resolve()); });
-    window.aaa = audio;
-    audio.play();
-    stage.addChild(shape);
-    stage.addChild(eqShape);
-    window.requestAnimationFrame(frame);
+    { // scene
+        stage.container.addChild(shape);
+        stage.container.addChild(eqShape);
+        window.requestAnimationFrame(frame);
+    }
+    { // audio
+        audio.crossOrigin = 'anonymous';
+        audio.src = audioSrc;
+        await new Promise(resolve => { audio.addEventListener('canplay', () => resolve()); });
+        audio.play();
+    }
 }
 
 function frame() {
@@ -60,7 +59,7 @@ function frame() {
     let { fftData, waveData } = analyzer;
     updateShape(analyzer.peak * 100);
     updateEqShape(fftData, waveData);
-    renderer.render(stage);
+    renderer.render(stage.container);
 }
 
 entry();

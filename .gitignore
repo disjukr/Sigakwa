@@ -1,5 +1,7 @@
 node_modules
 npm-debug.log
 
+*/dist/*.map
+
 Thumbs.db
 .DS_Store
