@@ -1,0 +1,14 @@
+{
+    "modules": "common",
+    "stage": 0,
+    "loose": ["es6.modules", "es6.classes"],
+    "optional": ["runtime"],
+    "env": {
+        "production": {
+            "optional": [
+                "minification.removeConsole",
+                "minification.removeDebugger"
+            ]
+        }
+    }
+}
