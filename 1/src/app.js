@@ -8,7 +8,7 @@ import { shape as eqShape, update as updateEqShape } from './eq-shape';
 
 const $body = $(document.body);
 let audio = new Audio();
-let renderer = new PIXI.autoDetectRenderer(stage.width, stage.height); {
+let renderer = stage.renderer; {
     let viewStyle = renderer.view.style;
     viewStyle.display = 'block';
     $(document.body).append(renderer.view);
@@ -16,24 +16,17 @@ let renderer = new PIXI.autoDetectRenderer(stage.width, stage.height); {
 let analyzer = new SoundAnalyzer(audio);
 { // onresize
     function onresize() {
-        renderer.resize(stage.width, stage.height);
-        { // shape
-            shape.x = stage.halfWidth;
-            shape.y = stage.halfHeight;
-        }
-        { // eq shape
-            eqShape.y = stage.height;
-        }
+        eqShape.y = stage.height;
     }
     onresize();
-    $(window).resize(onresize);
+    stage.e.on('resize', onresize);
 }
 
 async function entry() {
     const audioSrc = await new Promise((resolve, reject) => {
         soundcloudBadge({
             client_id: '728e63edbf69f6c2bbb7eddb3d41849f',
-            song: 'https://soundcloud.com/frz9999/right-light-rise-freezer-bootleg-mix',
+            song: 'https://soundcloud.com/plrusek-chan/struck-by-the-rain-n163',
             dark: false,
             getFonts: true
         }, (err, src) => {
@@ -57,7 +50,7 @@ async function entry() {
 function frame() {
     window.requestAnimationFrame(frame);
     let { fftData, waveData } = analyzer;
-    updateShape(analyzer.peak * 100);
+    updateShape(analyzer.peak);
     updateEqShape(fftData, waveData);
     renderer.render(stage.container);
 }
