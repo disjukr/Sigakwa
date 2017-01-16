@@ -1,4 +1,3 @@
-import soundcloudBadge from 'soundcloud-badge-packed';
 import SoundAnalyzer from './sound-analyzer';
 import PIXI from 'pixi';
 import $ from 'jquery';
@@ -23,17 +22,7 @@ let analyzer = new SoundAnalyzer(audio);
 }
 
 async function entry() {
-    const audioSrc = await new Promise((resolve, reject) => {
-        soundcloudBadge({
-            client_id: '728e63edbf69f6c2bbb7eddb3d41849f',
-            song: 'https://soundcloud.com/plrusek-chan/struck-by-the-rain-n163',
-            dark: false,
-            getFonts: true
-        }, (err, src) => {
-            if (err) reject(err);
-            else resolve(src);
-        });
-    });
+    const audioSrc = './daydream cafe (ditto kim 2cool4mofu mix).mp3';
     { // scene
         stage.container.addChild(shape);
         stage.container.addChild(eqShape);
